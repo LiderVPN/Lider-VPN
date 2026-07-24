@@ -7,150 +7,103 @@ on:
   pull_request:
     branches: [main, development]
 
-env:
-  PROJECT_DIR: .
-
 jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Find Flutter project
-        run: |
-          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: ${{ env.PROJECT_DIR }}/pubspec.yaml
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'jetbrains'
-      - name: Build APK
-        run: |
-          cd ${{ env.PROJECT_DIR }}
-          flutter pub get
-          flutter build apk --release
+      - run: flutter pub get
+      - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
   build-ios:
     name: Build iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Find Flutter project
-        run: |
-          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: ${{ env.PROJECT_DIR }}/pubspec.yaml
+      - name: Update CocoaPods repo
+        run: |
+          sudo gem install cocoapods
+          pod repo update
+      - name: Install Pods
+        run: |
+          cd ios
+          pod install
       - name: Build iOS
         run: |
-          cd ${{ env.PROJECT_DIR }}
           flutter pub get
           flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v4
         with:
           name: ios-app
-          path: ${{ env.PROJECT_DIR }}/build/ios/iphoneos/Runner.app
+          path: build/ios/iphoneos/Runner.app
 
   build-macos:
     name: Build macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Find Flutter project
-        run: |
-          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: ${{ env.PROJECT_DIR }}/pubspec.yaml
+      - name: Update CocoaPods repo
+        run: |
+          sudo gem install cocoapods
+          pod repo update
+      - name: Install Pods
+        run: |
+          cd macos
+          pod install
       - name: Build macOS
         run: |
-          cd ${{ env.PROJECT_DIR }}
           flutter pub get
           flutter build macos --release
       - uses: actions/upload-artifact@v4
         with:
           name: macos-app
-          path: ${{ env.PROJECT_DIR }}/build/macos/Build/Products/Release/*.app
+          path: build/macos/Build/Products/Release/*.app
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
     steps:
-      - name: Enable long paths
-        run: git config --system core.longpaths true
       - uses: actions/checkout@v4
-      - name: Find Flutter project
-        shell: pwsh
-        run: |
-          $PROJ = Get-ChildItem -Recurse -Filter pubspec.yaml | Select-Object -First 1 | ForEach-Object { $_.Directory.FullName }
-          echo "PROJECT_DIR=$PROJ" | Out-File -FilePath $env:GITHUB_ENV -Append
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: ${{ env.PROJECT_DIR }}/pubspec.yaml
-      - name: Build Windows
-        run: |
-          cd ${{ env.PROJECT_DIR }}
-          flutter pub get
-          flutter build windows --release
+      - run: flutter pub get
+      - run: flutter build windows --release --cmake-options "-G Visual Studio 17 2022 -A x64"
       - uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: ${{ env.PROJECT_DIR }}/build/windows/runner/Release/*.exe
+          path: build/windows/runner/Release/*.exe
 
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Find Flutter project
-        run: |
-          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version-file: ${{ env.PROJECT_DIR }}/pubspec.yaml
-      - name: Install Linux dependencies
-        run: sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
-      - name: Build Linux
-        run: |
-          cd ${{ env.PROJECT_DIR }}
-          flutter pub get
-          flutter build linux --release
+      - run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+      - run: flutter pub get
+      - run: flutter build linux --release
       - uses: actions/upload-artifact@v4
         with:
           name: linux-app
-          path: ${{ env.PROJECT_DIR }}/build/linux/x64/release/bundle
-
-  release:
-    name: Create Release
-    if: ${{ github.ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v') }}
-    needs: [build-android, build-ios, build-macos, build-windows, build-linux]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/android-apk/app-release.apk
-            artifacts/ios-app/Runner.app
-            artifacts/macos-app/*.app
-            artifacts/windows-app/*.exe
-            artifacts/linux-app/bundle/
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: build/linux/x64/release/bundle
