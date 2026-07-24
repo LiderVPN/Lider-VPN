@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [main, development]
 
+env:
+  PROJECT_DIR: .
+
 jobs:
   build-android:
     name: Build Android
@@ -14,11 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Find Flutter project
-        id: find_project
         run: |
-          PROJECT_DIR=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          echo "Project found in: $PROJECT_DIR"
+          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
+          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -27,7 +28,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'jetbrains'
-      - name: Build Android APK
+      - name: Build APK
         run: |
           cd ${{ env.PROJECT_DIR }}
           flutter pub get
@@ -43,11 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Find Flutter project
-        id: find_project
         run: |
-          PROJECT_DIR=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          echo "Project found in: $PROJECT_DIR"
+          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
+          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -68,11 +67,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Find Flutter project
-        id: find_project
         run: |
-          PROJECT_DIR=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          echo "Project found in: $PROJECT_DIR"
+          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
+          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -91,16 +88,14 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     steps:
-      - name: Enable long paths on Windows
+      - name: Enable long paths
         run: git config --system core.longpaths true
       - uses: actions/checkout@v4
       - name: Find Flutter project
-        id: find_project
         shell: pwsh
         run: |
-          $PROJECT_DIR = Get-ChildItem -Recurse -Filter pubspec.yaml | Select-Object -First 1 | ForEach-Object { $_.Directory.FullName }
-          echo "PROJECT_DIR=$PROJECT_DIR" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "Project found in: $PROJECT_DIR"
+          $PROJ = Get-ChildItem -Recurse -Filter pubspec.yaml | Select-Object -First 1 | ForEach-Object { $_.Directory.FullName }
+          echo "PROJECT_DIR=$PROJ" | Out-File -FilePath $env:GITHUB_ENV -Append
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -121,11 +116,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Find Flutter project
-        id: find_project
         run: |
-          PROJECT_DIR=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          echo "Project found in: $PROJECT_DIR"
+          PROJ=$(find . -name pubspec.yaml -exec dirname {} \; | head -1)
+          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
