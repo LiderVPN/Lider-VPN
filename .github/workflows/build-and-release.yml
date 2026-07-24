@@ -7,10 +7,16 @@ on:
   pull_request:
     branches: [main, development]
 
+env:
+  PROJECT_DIR: app/vpnclient.app-flutter
+
 jobs:
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
@@ -25,45 +31,54 @@ jobs:
       - uses: actions/upload-artifact@v5
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: ${{ env.PROJECT_DIR }}/build/app/outputs/flutter-apk/app-release.apk
 
   build-ios:
     name: Build iOS
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: sudo gem install cocoapods
-      - run: cd ios && pod install --repo-update || pod install
+      - run: cd ios && pod repo update && pod install
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v5
         with:
           name: ios-app
-          path: build/ios/iphoneos/Runner.app
+          path: ${{ env.PROJECT_DIR }}/build/ios/iphoneos/Runner.app
 
   build-macos:
     name: Build macOS
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: sudo gem install cocoapods
-      - run: cd macos && pod install --repo-update || pod install
+      - run: cd macos && pod repo update && pod install
       - run: flutter pub get
       - run: flutter build macos --release
       - uses: actions/upload-artifact@v5
         with:
           name: macos-app
-          path: build/macos/Build/Products/Release/*.app
+          path: ${{ env.PROJECT_DIR }}/build/macos/Build/Products/Release/*.app
 
   build-windows:
     name: Build Windows
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
@@ -74,11 +89,14 @@ jobs:
       - uses: actions/upload-artifact@v5
         with:
           name: windows-app
-          path: build/windows/runner/Release/*.exe
+          path: ${{ env.PROJECT_DIR }}/build/windows/runner/Release/*.exe
 
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
@@ -90,4 +108,4 @@ jobs:
       - uses: actions/upload-artifact@v5
         with:
           name: linux-app
-          path: build/linux/x64/release/bundle
+          path: ${{ env.PROJECT_DIR }}/build/linux/x64/release/bundle

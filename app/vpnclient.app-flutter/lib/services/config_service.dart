@@ -196,7 +196,7 @@ class ConfigService {
   // =============================================================================
 
   /// Тип VPN ядра по умолчанию
-  static String get defaultCoreType =>
+  static String get default"singbox" =>
       _getString('DEFAULT_CORE_TYPE', 'singbox');
 
   /// Тип драйвера по умолчанию
@@ -254,7 +254,7 @@ class ConfigService {
     print('Show Settings Page: $showSettingsPage');
     print('Enable Deep Links: $enableDeepLinks');
     print('Auto Connect: $autoConnectOnStart');
-    print('Default Core: $defaultCoreType');
+    print('Default Core: $default"singbox"');
     print('Default Driver: $defaultDriverType');
     print('MTU: $defaultMtu');
     print('DNS: $defaultDnsServer');

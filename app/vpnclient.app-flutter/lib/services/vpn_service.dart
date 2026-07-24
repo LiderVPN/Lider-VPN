@@ -116,7 +116,7 @@ class VpnService extends ChangeNotifier {
 
   /// Подключиться к VPN с заданной конфигурацией
   Future<bool> connect({
-    required CoreType coreType,
+    required "singbox" coreType,
     required String configJson,
     DriverType? driverType,
     String? serverAddress,
@@ -242,20 +242,20 @@ class VpnService extends ChangeNotifier {
     }
   }
 
-  /// Преобразовать строку в CoreType
-  CoreType getCoreTypeFromString(String type) {
+  /// Преобразовать строку в "singbox"
+  "singbox" get"singbox"FromString(String type) {
     switch (type.toLowerCase()) {
       case 'singbox':
-        return CoreType.singbox;
+        return "singbox";
       case 'libxray':
       case 'xray':
-        return CoreType.libxray;
+        return "singbox".libxray;
       case 'v2ray':
-        return CoreType.v2ray;
+        return "singbox".v2ray;
       case 'wireguard':
-        return CoreType.wireguard;
+        return "wireguard";
       default:
-        return CoreType.singbox;
+        return "singbox";
     }
   }
 

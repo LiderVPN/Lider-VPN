@@ -59,3 +59,6 @@ l10n:
   output-class: AppLocalizations
   output-dir: lib/l10n
   untranslated-messages-file: lib/l10n/untranslated_messages.txt
+
+dependency_overrides:
+  intl: 0.19.0
